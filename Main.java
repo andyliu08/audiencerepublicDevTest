@@ -2,8 +2,10 @@ import java.util.*;
 
 // Generate Random values
 class RandomUtil {
+
     private Random rndm = new Random();
     private int maxVal;
+
     RandomUtil(int maxVal) {
         this.maxVal = maxVal;
     }
@@ -24,14 +26,17 @@ class Graph {
 
     // Key is the index of fromVertex and Value is a key value pair <toVertex, weight>
     private HashMap<Integer, HashMap<Integer, Integer>> graph;
+
     private int vertexNumber;
     private int edgeNumber;
+
     private RandomUtil rndmWeight;
     private RandomUtil rndmVertex;
+
     final int maxWeightSetting = 5;
 
     // Generate a simple connected direct Graph with vertexNumber and edgeNumber
-    public Graph(int vertexNumber, int edgeNumber) {
+    Graph(int vertexNumber, int edgeNumber) {
         this.vertexNumber = vertexNumber;
         this.edgeNumber = edgeNumber;
         this.rndmWeight = new RandomUtil(maxWeightSetting);
@@ -124,7 +129,9 @@ class Graph {
         System.out.println("================================");
     }
 
-    int maxWeight = 0;
+    // record the max total weight for each vertex 
+    private int maxWeight = 0;
+
     public Graph computeDiameter() {
         int radius = 0;
         int diameter = 0;
@@ -133,7 +140,7 @@ class Graph {
             LinkedList<Integer> currentPath = new LinkedList<>();
             currentPath.add(i);
             maxWeight = 0;
-            int eccentricity = computeEcce(i, currentPath, 0);
+            int eccentricity = computeEcceBacktrack(i, currentPath, 0);
             if( i == 1) {
                 diameter = eccentricity;
                 radius = eccentricity;
@@ -152,8 +159,9 @@ class Graph {
         return this;
     }
 
-    private int computeEcce(int start, LinkedList<Integer> currentPath, int dist) {
+    private int computeEcceBacktrack(int start, LinkedList<Integer> currentPath, int dist) {
         HashMap<Integer, Integer> next = graph.get(start);
+        // return the total max weight if no next vertex
         if(next ==null || next.isEmpty())
             return maxWeight;
 
@@ -161,12 +169,15 @@ class Graph {
             int nextVer = entry.getKey();
             int weight = entry.getValue();
 
+            // skip if the next vertex already visited
             if(currentPath.contains(nextVer)) continue;
 
             currentPath.add(nextVer);
             dist += weight;
+
             maxWeight = Math.max(maxWeight, dist);
-            computeEcce(nextVer, currentPath, dist);
+            computeEcceBacktrack(nextVer, currentPath, dist);
+
             currentPath.removeLast();
             dist -= weight;
         }
@@ -174,11 +185,11 @@ class Graph {
         return maxWeight;
     }
     
-        private String reversePath(int s, int t, int[] predecessor) {
+    private String reversePath(int vertex1, int vertex2, int[] predecessor) {
         StringBuilder sb = new StringBuilder();
-        while(s != t) {
-            sb.append(" ").append(t);
-            t = predecessor[t];
+        while(vertex1 != vertex2) {
+            sb.append(" ").append(vertex2);
+            vertex2 = predecessor[vertex2];
         }
 
         String[] sbs = sb.toString().trim().split(" ");
@@ -190,11 +201,11 @@ class Graph {
          return revsb.toString();
     }
 
-    private String generateShortestPath(int s, int t, int[] predecessor, int weight) {
-        return weight + ", " + s + reversePath(s, t, predecessor);
+    private String generateShortestPath(int vertex1, int vertex2, int[] predecessor, int weight) {
+        return weight + ", " + vertex1 + reversePath(vertex1, vertex2, predecessor);
     }
 
-    private String dijkstra(int s, int t) {
+    private String dijkstra(int vertex1, int vertex2) {
         int v = graph.size() + 1;
         int[] dist = new int[v];
         boolean[] visited = new boolean[v];
@@ -203,8 +214,8 @@ class Graph {
         }
         int[] predecessor = new int[v];
         Queue<Integer> queue = new LinkedList<>();
-        queue.add(s);
-        dist[s] = 0;
+        queue.add(vertex1);
+        dist[vertex1] = 0;
         while (!queue.isEmpty()) {
             Integer vertex = queue.poll();
             if (visited[vertex]) continue;
@@ -223,20 +234,22 @@ class Graph {
             }
         }
 
-        if(dist[t] == Integer.MAX_VALUE)
+        // Return the maximum Integer for the weight if the current searching path can not be reachable
+        if(dist[vertex2] == Integer.MAX_VALUE)
             return Integer.MAX_VALUE + ", ";
 
-        return generateShortestPath(s, t, predecessor, dist[t]);
+        return generateShortestPath(vertex1, vertex2, predecessor, dist[vertex2]);
     }
 
-    public void getShortestPath(int s, int t) {
-        String[] resForward = dijkstra(s, t).split(",");
-        String[] resBackward = dijkstra(t, s).split(",");
+    public void getShortestPath(int vertex1, int vertex2) {
+        // Try to get the shortest path from vertex1 to vertex2 and from vertex2 to vertex1
+        String[] resForward = dijkstra(vertex1, vertex2).split(",");
+        String[] resBackward = dijkstra(vertex2, vertex1).split(",");
 
         int disForward = Integer.parseInt(resForward[0]);
         int disBackward = Integer.parseInt(resBackward[0]);
 
-        System.out.println("The shortest distance path between vertex " + s + " and vertex " + t + " :");
+        System.out.println("The shortest distance path between vertex " + vertex1 + " and vertex " + vertex2 + " :");
         if(disForward < disBackward) {
             System.out.println(resForward[1]);
             System.out.println("Total Weight: " + disForward);
@@ -259,4 +272,3 @@ class Solution {
 
     }
 }
-
