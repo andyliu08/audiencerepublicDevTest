@@ -57,8 +57,8 @@ class Graph {
 
         // create a minimum connected direct Graph based on the shuffle vertex index
         int edgeNumberCreated = createMiniConnectedGraph(vertexList);
-        // add more random edges until the edge number meet the expectation
-        addRandomEdges(vertexList, this.edgeNumber - edgeNumberCreated);
+        // add more edges until the edge number meet the expectation
+        addRestEdges(vertexList, this.edgeNumber - edgeNumberCreated);
     }
 
     private List<Integer> generateShuffleVertex()
@@ -92,20 +92,40 @@ class Graph {
         return edgesNum;
     }
 
-    private void addRandomEdges(List<Integer> list, int restEdges) {
-        while(restEdges > 0) {
-            // FixedMe: It may be quite difficult to generate random edges 
-            // when the required edges number exceed 70% of the max of allowed edges
-            // for example graph N 4 S 10
-            // S should be between [3, 12], the program stop to generate random edges if need generate 10
+    private void addRestEdges(List<Integer> vertexList, int restEdges) {
+        // Add random edges if adding less than 60% of the max allowed edges
+        if(this.edgeNumber <= this.vertexNumber * (this.vertexNumber - 1) * 0.6) {
+            addRandomEdges(restEdges);
+        } else {
+            // add edges following the vertexList order
+            addEdges(restEdges);
+        }
+    }
 
-            int cur = list.get(this.rndmVertex.generateRandomNum());
-            int next = list.get(this.rndmVertex.generateRandomNum());
+    private void addRandomEdges(int restEdges) {
+        while(restEdges > 0) {
+            int[] rndm2 = this.rndmVertex.generateTwoRandomNums();
+            int cur = rndm2[0];
+            int next = rndm2[1];
             if(cur == next)
                 continue;
             if(!this.graph.get(cur).containsKey(next)) {
                 this.graph.get(cur).putIfAbsent(next, this.rndmWeight.generateRandomNum());
                 restEdges--;
+            }
+        }
+    }
+
+    private void addEdges(int restEdges) {
+        for(int i = 1; i <= this.vertexNumber; i++) {
+            for(int j = 1; j <= this.vertexNumber; j++) {
+                if(i == j) continue;
+                if(!this.graph.get(i).containsKey(j)) {
+                    this.graph.get(i).putIfAbsent(j, this.rndmWeight.generateRandomNum());
+                    restEdges--;
+                    if(restEdges == 0)
+                        return;
+                }
             }
         }
     }
