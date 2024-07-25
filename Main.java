@@ -262,9 +262,22 @@ class Graph {
 class Solution {
    public static void main(String argv) {
         String[] parameters = argv.split(" ");
-   
-        final int vertexNum = Integer.parseInt(parameters[2]);
-        final int edgeNum = Integer.parseInt(parameters[4]);
+        int vertexNum, edgeNum;
+
+        try {
+            vertexNum = Integer.parseInt(parameters[2]);
+            edgeNum = Integer.parseInt(parameters[4]);
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Please check whether you command is right format");
+            System.out.println("Example: graph -N 8 -S 15");
+            return;
+        }
+
+        if(edgeNum < vertexNum - 1 || edgeNum > vertexNum * (vertexNum - 1)) {
+            System.out.println("Error: S should be in the range between N-1 (inclusive) to N(N-1) (inclusive)");
+            return;
+        }
+
         RandomUtil rndm = new RandomUtil(vertexNum);
         int[] nodes = rndm.generateTwoRandomNums();
 
