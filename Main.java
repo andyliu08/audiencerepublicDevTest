@@ -94,6 +94,11 @@ class Graph {
 
     private void addRandomEdges(List<Integer> list, int restEdges) {
         while(restEdges > 0) {
+            // FixedMe: It may be quite difficult to generate random edges 
+            // when the required edges number exceed 70% of the max of allowed edges
+            // for example graph N 4 S 10
+            // S should be between [3, 12], the program stop to generate random edges if need generate 10
+
             int cur = list.get(this.rndmVertex.generateRandomNum());
             int next = list.get(this.rndmVertex.generateRandomNum());
             if(cur == next)
@@ -279,9 +284,9 @@ class Solution {
         }
 
         RandomUtil rndm = new RandomUtil(vertexNum);
-        int[] nodes = rndm.generateTwoRandomNums();
+        int[] vertexs = rndm.generateTwoRandomNums();
 
-        new Graph(vertexNum, edgeNum).computeDiameter().getShortestPath(nodes[0], nodes[1]);
+        new Graph(vertexNum, edgeNum).computeDiameter().getShortestPath(vertexs[0], vertexs[1]);
 
     }
 }
