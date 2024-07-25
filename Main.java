@@ -292,7 +292,7 @@ class Solution {
         try {
             vertexNum = Integer.parseInt(parameters[2]);
             edgeNum = Integer.parseInt(parameters[4]);
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             System.out.println("Error: Please check whether you command is right format");
             System.out.println("Example: graph -N 8 -S 15");
             return;
