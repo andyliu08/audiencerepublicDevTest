@@ -299,7 +299,7 @@ class Solution {
         }
 
         if(edgeNum < vertexNum - 1 || edgeNum > vertexNum * (vertexNum - 1)) {
-            System.out.println("Error: S should be in the range between N-1 (inclusive) to N(N-1) (inclusive)");
+            System.out.println("Error: S should be in the range between " + (vertexNum-1) + " (inclusive) to " + (vertexNum*(vertexNum-1)) + " (inclusive)");
             return;
         }
 
