@@ -28,9 +28,13 @@ Results including:
 # Note
 
 1. As Jshell can only open one file to be executed, I have to move all the classes into the file "Solution.java", but Ideally, I would like use the following file structure
-   Algorithm.java
-   GraphHashMap.java
-   GraphInterface.java
-   RandomUtil.java
-   Solution.java
-   
+
+   - Algorithm.java
+
+   - GraphHashMap.java
+
+   - GraphInterface.java
+
+   - RandomUtil.java
+
+   - Solution.java
