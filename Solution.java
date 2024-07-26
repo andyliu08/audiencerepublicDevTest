@@ -1,6 +1,9 @@
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
-// Generate Random values
+
+
 class RandomUtil {
 
     private Random rndm = new Random();
@@ -22,8 +25,19 @@ class RandomUtil {
     }
 }
 
-class Graph {
 
+interface GraphInterface {
+    int getVertexNumber();
+
+    List<String> getNextVertexArray(int start);
+
+    GraphHashMap createConnectedGraph();
+
+    void printGraph();
+
+}
+
+class GraphHashMap implements GraphInterface {
     // Key is the index of fromVertex and Value is a key value pair <toVertex, weight>
     private HashMap<Integer, HashMap<Integer, Integer>> graph;
 
@@ -35,36 +49,33 @@ class Graph {
 
     final int maxWeightSetting = 5;
 
-    // Generate a simple connected direct Graph with vertexNumber and edgeNumber
-    Graph(int vertexNumber, int edgeNumber) {
+    GraphHashMap(int vertexNumber, int edgeNumber) {
         this.vertexNumber = vertexNumber;
         this.edgeNumber = edgeNumber;
         this.rndmWeight = new RandomUtil(maxWeightSetting);
         this.rndmVertex = new RandomUtil(this.vertexNumber);
         this.graph = new HashMap<>();
 
-        for(int i = 1; i <= this.vertexNumber; i++) {
+        for (int i = 1; i <= this.vertexNumber; i++) {
             this.graph.put(i, new HashMap<>());
         }
-
-        // create a connected direct Graph
-        createConnectedGraph();
-        printGraph();
     }
 
-    private void createConnectedGraph() {
+    // Generate a simple connected direct Graph with vertexNumber and edgeNumber
+    public GraphHashMap createConnectedGraph() {
         List<Integer> vertexList = generateShuffleVertex();
 
         // create a minimum connected direct Graph based on the shuffle vertex index
         int edgeNumberCreated = createMiniConnectedGraph(vertexList);
         // add more edges until the edge number meet the expectation
         addRestEdges(vertexList, this.edgeNumber - edgeNumberCreated);
+
+        return this;
     }
 
-    private List<Integer> generateShuffleVertex()
-    {
+    private List<Integer> generateShuffleVertex() {
         List<Integer> shuffleVertexList = new ArrayList<>();
-        for(int i = 1; i <= this.vertexNumber; i++)
+        for (int i = 1; i <= this.vertexNumber; i++)
             shuffleVertexList.add(i);
         Collections.shuffle(shuffleVertexList);
         return shuffleVertexList;
@@ -80,7 +91,7 @@ class Graph {
         int index = 1;
         while (!src.isEmpty()) {
             int neighbour = list.get(index);
-            if(!dst.contains(neighbour)) {
+            if (!dst.contains(neighbour)) {
                 this.graph.get(cur).putIfAbsent(neighbour, this.rndmWeight.generateRandomNum());
                 edgesNum++;
                 src.remove(neighbour);
@@ -94,7 +105,7 @@ class Graph {
 
     private void addRestEdges(List<Integer> vertexList, int restEdges) {
         // Add random edges if adding less than 60% of the max allowed edges
-        if(this.edgeNumber <= this.vertexNumber * (this.vertexNumber - 1) * 0.6) {
+        if (this.edgeNumber <= this.vertexNumber * (this.vertexNumber - 1) * 0.6) {
             addRandomEdges(restEdges);
         } else {
             // add edges following the vertexList order
@@ -103,13 +114,13 @@ class Graph {
     }
 
     private void addRandomEdges(int restEdges) {
-        while(restEdges > 0) {
+        while (restEdges > 0) {
             int[] rndm2 = this.rndmVertex.generateTwoRandomNums();
             int cur = rndm2[0];
             int next = rndm2[1];
-            if(cur == next)
+            if (cur == next)
                 continue;
-            if(!this.graph.get(cur).containsKey(next)) {
+            if (!this.graph.get(cur).containsKey(next)) {
                 this.graph.get(cur).putIfAbsent(next, this.rndmWeight.generateRandomNum());
                 restEdges--;
             }
@@ -117,32 +128,32 @@ class Graph {
     }
 
     private void addEdges(int restEdges) {
-        for(int i = 1; i <= this.vertexNumber; i++) {
-            for(int j = 1; j <= this.vertexNumber; j++) {
-                if(i == j) continue;
-                if(!this.graph.get(i).containsKey(j)) {
+        for (int i = 1; i <= this.vertexNumber; i++) {
+            for (int j = 1; j <= this.vertexNumber; j++) {
+                if (i == j) continue;
+                if (!this.graph.get(i).containsKey(j)) {
                     this.graph.get(i).putIfAbsent(j, this.rndmWeight.generateRandomNum());
                     restEdges--;
-                    if(restEdges == 0)
+                    if (restEdges == 0)
                         return;
                 }
             }
         }
     }
 
-    private void printGraph() {
+    public void printGraph() {
         System.out.println("Print out the randomly generated graph: ");
         System.out.println("{ ");
-        for(int i = 1; i <= this.vertexNumber; i++) {
+        for (int i = 1; i <= this.vertexNumber; i++) {
             System.out.print("   :" + i + "  [ ");
-            if(this.graph.get(i).isEmpty()) {
+            if (this.graph.get(i).isEmpty()) {
                 System.out.println("],");
             } else {
                 for (Map.Entry<Integer, Integer> entry : this.graph.get(i).entrySet()) {
                     System.out.print("(:" + entry.getKey() + " " + entry.getValue() + ") ");
                 }
 
-                if(i == this.vertexNumber) {
+                if (i == this.vertexNumber) {
                     System.out.println("]");
                 } else {
                     System.out.println("],");
@@ -154,19 +165,43 @@ class Graph {
         System.out.println("================================");
     }
 
-    // record the max total weight for each vertex 
+    @Override
+    public int getVertexNumber() {
+        return this.vertexNumber;
+    }
+
+    @Override
+    public List<String> getNextVertexArray(int start) {
+        List<String> res = new ArrayList<>();
+        HashMap<Integer, Integer> next = graph.get(start);
+        // return the total max weight if no next vertex
+        if (next == null || next.isEmpty())
+            return res;
+
+        for (Map.Entry<Integer, Integer> entry : next.entrySet()) {
+            String nextVertex = entry.getKey().toString();
+            String weight = entry.getValue().toString();
+            res.add(nextVertex + "," + weight);
+        }
+        return res;
+    }
+}
+
+
+class Algorithm {
+    // record the max total weight for each vertex
     private int maxWeight = 0;
 
-    public Graph computeDiameter() {
+    public Algorithm computeDiameter(GraphInterface graph) {
         int radius = 0;
         int diameter = 0;
         System.out.println("The eccentricity of all the Vertex: ");
-        for(int i = 1; i <= this.vertexNumber; i++) {
+        for (int i = 1; i <= graph.getVertexNumber(); i++) {
             LinkedList<Integer> currentPath = new LinkedList<>();
             currentPath.add(i);
             maxWeight = 0;
-            int eccentricity = computeEcceBacktrack(i, currentPath, 0);
-            if( i == 1) {
+            int eccentricity = computeEcceBacktrack(graph, i, currentPath, 0);
+            if (i == 1) {
                 diameter = eccentricity;
                 radius = eccentricity;
             }
@@ -184,24 +219,24 @@ class Graph {
         return this;
     }
 
-    private int computeEcceBacktrack(int start, LinkedList<Integer> currentPath, int dist) {
-        HashMap<Integer, Integer> next = graph.get(start);
+    private int computeEcceBacktrack(GraphInterface graph, int start, LinkedList<Integer> currentPath, int dist) {
+        List<String> next = graph.getNextVertexArray(start);
         // return the total max weight if no next vertex
-        if(next ==null || next.isEmpty())
+        if (next.isEmpty())
             return maxWeight;
 
-        for (Map.Entry<Integer, Integer> entry : next.entrySet()) {
-            int nextVer = entry.getKey();
-            int weight = entry.getValue();
+        for (String n : next) {
+            int nextVer = Integer.parseInt(n.split(",")[0]);
+            int weight = Integer.parseInt(n.split(",")[1]);
 
             // skip if the next vertex already visited
-            if(currentPath.contains(nextVer)) continue;
+            if (currentPath.contains(nextVer)) continue;
 
             currentPath.add(nextVer);
             dist += weight;
 
             maxWeight = Math.max(maxWeight, dist);
-            computeEcceBacktrack(nextVer, currentPath, dist);
+            computeEcceBacktrack(graph, nextVer, currentPath, dist);
 
             currentPath.removeLast();
             dist -= weight;
@@ -209,29 +244,29 @@ class Graph {
 
         return maxWeight;
     }
-    
+
     private String reversePath(int vertex1, int vertex2, int[] predecessor) {
         StringBuilder sb = new StringBuilder();
-        while(vertex1 != vertex2) {
+        while (vertex1 != vertex2) {
             sb.append(" ").append(vertex2);
             vertex2 = predecessor[vertex2];
         }
 
         String[] sbs = sb.toString().trim().split(" ");
         StringBuilder revsb = new StringBuilder();
-        for(int i = sbs.length - 1; i >= 0; i--) {
-            revsb.append(" -> " ).append(sbs[i]);
+        for (int i = sbs.length - 1; i >= 0; i--) {
+            revsb.append(" -> ").append(sbs[i]);
         }
 
-         return revsb.toString();
+        return revsb.toString();
     }
 
     private String generateShortestPath(int vertex1, int vertex2, int[] predecessor, int weight) {
         return weight + ", " + vertex1 + reversePath(vertex1, vertex2, predecessor);
     }
 
-    private String dijkstra(int vertex1, int vertex2) {
-        int v = graph.size() + 1;
+    private String dijkstra(GraphInterface graph, int vertex1, int vertex2) {
+        int v = graph.getVertexNumber() + 1;
         int[] dist = new int[v];
         boolean[] visited = new boolean[v];
         for (int i = 0; i < v; i++) {
@@ -246,36 +281,40 @@ class Graph {
             if (visited[vertex]) continue;
             visited[vertex] = true;
 
-            HashMap<Integer, Integer> next = graph.get(vertex);
-            if(next ==null || next.isEmpty())
+            List<String> next = graph.getNextVertexArray(vertex);
+            // skip if no next vertex
+            if (next.isEmpty())
                 continue;
 
-            for (Map.Entry<Integer, Integer> entry : next.entrySet()) {
-                if (dist[vertex] < (dist[entry.getKey()] - entry.getValue())) {
-                    dist[entry.getKey()] = dist[vertex] + entry.getValue();
-                    predecessor[entry.getKey()] = vertex;
+            for (String n : next) {
+                int nextVer = Integer.parseInt(n.split(",")[0]);
+                int weight = Integer.parseInt(n.split(",")[1]);
+
+                if (dist[vertex] < (dist[nextVer] - weight)) {
+                    dist[nextVer] = dist[vertex] + weight;
+                    predecessor[nextVer] = vertex;
                 }
-                queue.add(entry.getKey());
+                queue.add(nextVer);
             }
         }
 
         // Return the maximum Integer for the weight if the current searching path can not be reachable
-        if(dist[vertex2] == Integer.MAX_VALUE)
+        if (dist[vertex2] == Integer.MAX_VALUE)
             return Integer.MAX_VALUE + ", ";
 
         return generateShortestPath(vertex1, vertex2, predecessor, dist[vertex2]);
     }
 
-    public void getShortestPath(int vertex1, int vertex2) {
+    public void getShortestPath(GraphInterface graph, int vertex1, int vertex2) {
         // Try to get the shortest path from vertex1 to vertex2 and from vertex2 to vertex1
-        String[] resForward = dijkstra(vertex1, vertex2).split(",");
-        String[] resBackward = dijkstra(vertex2, vertex1).split(",");
+        String[] resForward = dijkstra(graph, vertex1, vertex2).split(",");
+        String[] resBackward = dijkstra(graph, vertex2, vertex1).split(",");
 
         int disForward = Integer.parseInt(resForward[0]);
         int disBackward = Integer.parseInt(resBackward[0]);
 
         System.out.println("The shortest distance path between vertex " + vertex1 + " and vertex " + vertex2 + " :");
-        if(disForward < disBackward) {
+        if (disForward < disBackward) {
             System.out.println(resForward[1]);
             System.out.println("Total Weight: " + disForward);
         } else {
@@ -284,8 +323,12 @@ class Graph {
         }
     }
 }
-class Solution {
-   public static void main(String argv) {
+
+
+
+
+public class Solution {
+    public static void main(String argv) {
         String[] parameters = argv.split(" ");
         int vertexNum, edgeNum;
 
@@ -304,9 +347,13 @@ class Solution {
         }
 
         RandomUtil rndm = new RandomUtil(vertexNum);
-        int[] vertexs = rndm.generateTwoRandomNums();
+        int[] nodes = rndm.generateTwoRandomNums();
 
-        new Graph(vertexNum, edgeNum).computeDiameter().getShortestPath(vertexs[0], vertexs[1]);
+        GraphInterface graph = new GraphHashMap(vertexNum, edgeNum);
+        graph.createConnectedGraph().printGraph();
+
+        Algorithm alg = new Algorithm();
+        alg.computeDiameter(graph).getShortestPath(graph, nodes[0], nodes[1]);
 
     }
 }
