@@ -28,5 +28,9 @@ Results including:
 # Note
 
 1. As Jshell can only open one file to be executed, I have to move all the classes into the file "Solution.java", but Ideally, I would like use the following file structure
-
-![Screenshot 2024-07-26 111132](README.assets/Screenshot 2024-07-26 111132.png)
+   Algorithm.java
+   GraphHashMap.java
+   GraphInterface.java
+   RandomUtil.java
+   Solution.java
+   
