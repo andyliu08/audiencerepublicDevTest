@@ -24,7 +24,7 @@ class RandomUtil {
 }
 
 
-public interface GraphInterface {
+interface GraphInterface {
     // get the number of vertex
     int getVertexNumber();
 
@@ -53,23 +53,12 @@ class GraphHashMap implements GraphInterface {
     private int vertexNumber;
     private int edgeNumber;
 
-    // Generate the random value for weight
-    private RandomUtil rndmWeight;
-
-    // Generate the random vertex index
-    private RandomUtil rndmVertex;
-
-    // Max weight can be set
-    final int maxWeightSetting = 5;
-
     // The Algorithm to compute the graph
     private AlgorithmInterface alg = null;
 
     GraphHashMap(int vertexNumber, int edgeNumber) {
         this.vertexNumber = vertexNumber;
         this.edgeNumber = edgeNumber;
-        this.rndmWeight = new RandomUtil(maxWeightSetting);
-        this.rndmVertex = new RandomUtil(this.vertexNumber);
         this.graph = new HashMap<>();
         for (int i = 1; i <= this.vertexNumber; i++) {
             this.graph.put(i, new HashMap<>());
@@ -84,9 +73,10 @@ class GraphHashMap implements GraphInterface {
         // create a minimum connected direct Graph based on the shuffle vertex index
         int edgeNumberCreated = createMiniConnectedGraph(vertexList);
         // add more edges until the edge number meet the expectation
-        addRestEdges(vertexList, this.edgeNumber - edgeNumberCreated);
-        
+        addRestEdges(this.edgeNumber - edgeNumberCreated);
+        // Print graph in an elegant way
         printGraph();
+
         return this;
     }
 
@@ -100,7 +90,7 @@ class GraphHashMap implements GraphInterface {
     public List<String> getNextVertexArray(int start) {
         List<String> res = new ArrayList<>();
         HashMap<Integer, Integer> next = graph.get(start);
-        // return the total max weight if no next vertex
+        // return an empty list if no next vertex
         if (next == null || next.isEmpty())
             return res;
 
@@ -149,6 +139,11 @@ class GraphHashMap implements GraphInterface {
         return shuffleVertexList;
     }
 
+    private void addEdge(int from, int to) {
+        // Generate the random value for weight from 1 to 5
+        this.graph.get(from).putIfAbsent(to, (new RandomUtil(5)).generateRandomNum());
+    }
+
     private int createMiniConnectedGraph(List<Integer> list) {
         HashSet<Integer> src = new HashSet<>(list);
         HashSet<Integer> dst = new HashSet<>();
@@ -160,7 +155,7 @@ class GraphHashMap implements GraphInterface {
         while (!src.isEmpty()) {
             int neighbour = list.get(index);
             if (!dst.contains(neighbour)) {
-                this.graph.get(cur).putIfAbsent(neighbour, this.rndmWeight.generateRandomNum());
+                addEdge(cur, neighbour);
                 edgesNum++;
                 src.remove(neighbour);
                 dst.add(neighbour);
@@ -171,7 +166,7 @@ class GraphHashMap implements GraphInterface {
         return edgesNum;
     }
 
-    private void addRestEdges(List<Integer> vertexList, int restEdges) {
+    private void addRestEdges(int restEdges) {
         // Add random edges if adding less than 60% of the max allowed edges
         if (this.edgeNumber <= this.vertexNumber * (this.vertexNumber - 1) * 0.6) {
             addRandomEdges(restEdges);
@@ -183,24 +178,25 @@ class GraphHashMap implements GraphInterface {
 
     private void addRandomEdges(int restEdges) {
         while (restEdges > 0) {
-            int[] rndm2 = this.rndmVertex.generateTwoRandomNums();
-            int cur = rndm2[0];
-            int next = rndm2[1];
-            if (cur == next)
+            // Generate the random fromVertex and toVertex
+            int[] rndm2 = (new RandomUtil(this.vertexNumber)).generateTwoRandomNums();
+            int from = rndm2[0];
+            int to = rndm2[1];
+            if (from == to)
                 continue;
-            if (!this.graph.get(cur).containsKey(next)) {
-                this.graph.get(cur).putIfAbsent(next, this.rndmWeight.generateRandomNum());
+            if (!this.graph.get(from).containsKey(to)) {
+                addEdge(from, to);
                 restEdges--;
             }
         }
     }
 
     private void addEdges(int restEdges) {
-        for (int i = 1; i <= this.vertexNumber; i++) {
-            for (int j = 1; j <= this.vertexNumber; j++) {
-                if (i == j) continue;
-                if (!this.graph.get(i).containsKey(j)) {
-                    this.graph.get(i).putIfAbsent(j, this.rndmWeight.generateRandomNum());
+        for (int from = 1; from <= this.vertexNumber; from++) {
+            for (int to = 1; to <= this.vertexNumber; to++) {
+                if (from == to) continue;
+                if (!this.graph.get(from).containsKey(to)) {
+                    addEdge(from, to);
                     restEdges--;
                     if (restEdges == 0)
                         return;
@@ -244,7 +240,7 @@ interface AlgorithmInterface {
 
 }
 
-public class Algorithm implements AlgorithmInterface{
+class Algorithm implements AlgorithmInterface{
 
     // record the max total weight for each vertex
     private int maxWeight = 0;
@@ -395,7 +391,7 @@ public class Solution {
             vertexNum = Integer.parseInt(parameters[2]);
             edgeNum = Integer.parseInt(parameters[4]);
         } catch (Exception e) {
-            System.out.println("Error: Please check whether you command is right format");
+            System.out.println("Error: Please check whether the command follows the right format");
             System.out.println("Example: graph -N 8 -S 15");
             return;
         }
