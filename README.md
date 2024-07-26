@@ -5,7 +5,7 @@ Suppose you already install Jshell in your machine
 1. Open the code in Jshell 
 
 ```
-jshell> /open Main.java
+jshell> /open Solution.java
 ```
 
 2. Running the code
