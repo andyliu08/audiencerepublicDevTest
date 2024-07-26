@@ -38,8 +38,10 @@ public interface GraphInterface {
     // Add the algorithm to compute the graph
     GraphInterface setAlgorithm(AlgorithmInterface alg);
 
+    // Computer Diameter, eccentricity and radius
     GraphInterface computeDiameter();
 
+    // Retrieve the shortest path between vertex1 and vertex2
     GraphInterface computeShortestPath(int vertex1, int vertex2);
 }
 
@@ -51,15 +53,16 @@ class GraphHashMap implements GraphInterface {
     private int vertexNumber;
     private int edgeNumber;
 
-    // generate the random value for weight
+    // Generate the random value for weight
     private RandomUtil rndmWeight;
 
-    // generate the random vertex index
+    // Generate the random vertex index
     private RandomUtil rndmVertex;
 
-    // the max weight can be set
+    // Max weight can be set
     final int maxWeightSetting = 5;
 
+    // The Algorithm to compute the graph
     private AlgorithmInterface alg = null;
 
     GraphHashMap(int vertexNumber, int edgeNumber) {
@@ -68,7 +71,6 @@ class GraphHashMap implements GraphInterface {
         this.rndmWeight = new RandomUtil(maxWeightSetting);
         this.rndmVertex = new RandomUtil(this.vertexNumber);
         this.graph = new HashMap<>();
-
         for (int i = 1; i <= this.vertexNumber; i++) {
             this.graph.put(i, new HashMap<>());
         }
@@ -94,6 +96,7 @@ class GraphHashMap implements GraphInterface {
     }
 
     @Override
+    // Get the next level of all the vertex with weight staring from vertex start
     public List<String> getNextVertexArray(int start) {
         List<String> res = new ArrayList<>();
         HashMap<Integer, Integer> next = graph.get(start);
@@ -102,14 +105,14 @@ class GraphHashMap implements GraphInterface {
             return res;
 
         for (Map.Entry<Integer, Integer> entry : next.entrySet()) {
-            String nextVertex = entry.getKey().toString();
-            String weight = entry.getValue().toString();
-            res.add(nextVertex + "," + weight);
+            // add the string nextVertexIndex, weight
+            res.add(entry.getKey().toString() + "," + entry.getValue().toString());
         }
         return res;
     }
 
     @Override
+    // Set the Algorithm used to compute graph
     public GraphInterface setAlgorithm(AlgorithmInterface alg) {
         this.alg = alg;
         return this;
@@ -127,6 +130,7 @@ class GraphHashMap implements GraphInterface {
     }
 
     @Override
+    // Get the shortest distance path between vertex1 and vertex2 using Dijkstra algorithm
     public GraphInterface computeShortestPath(int vertex1, int vertex2) {
         if(this.alg == null) {
             System.out.println("Algorithm is missing, please call setAlgorithm to set it");
@@ -232,8 +236,10 @@ class GraphHashMap implements GraphInterface {
 
 interface AlgorithmInterface {
 
+    // Computer Diameter, eccentricity and radius
     AlgorithmInterface computeDiameter(GraphInterface graph);
 
+    // Get the shortest distance path between vertex1 and vertex2 using Dijkstra algorithm
     void getShortestPath(GraphInterface graph, int vertex1, int vertex2);
 
 }
@@ -244,6 +250,7 @@ public class Algorithm implements AlgorithmInterface{
     private int maxWeight = 0;
 
     @Override
+    // Computer Diameter, eccentricity and radius
     public Algorithm computeDiameter(GraphInterface graph) {
         int radius = 0;
         int diameter = 0;
@@ -272,6 +279,7 @@ public class Algorithm implements AlgorithmInterface{
     }
 
     @Override
+    // Get the shortest distance path between vertex1 and vertex2 using Dijkstra algorithm
     public void getShortestPath(GraphInterface graph, int vertex1, int vertex2) {
         // Try to get the shortest path from vertex1 to vertex2 and from vertex2 to vertex1
         String[] resForward = dijkstra(graph, vertex1, vertex2).split(",");
@@ -290,6 +298,7 @@ public class Algorithm implements AlgorithmInterface{
         }
     }
 
+    // Compute eccentricity of Vertex start using backtracking
     private int computeEcceBacktrack(GraphInterface graph, int start, LinkedList<Integer> currentPath, int dist) {
         List<String> next = graph.getNextVertexArray(start);
         // return the total max weight if no next vertex
@@ -337,13 +346,13 @@ public class Algorithm implements AlgorithmInterface{
     }
 
     private String dijkstra(GraphInterface graph, int vertex1, int vertex2) {
-        int v = graph.getVertexNumber() + 1;
-        int[] dist = new int[v];
-        boolean[] visited = new boolean[v];
-        for (int i = 0; i < v; i++) {
+        int vertexCnt = graph.getVertexNumber() + 1;
+        int[] dist = new int[vertexCnt];
+        boolean[] visited = new boolean[vertexCnt];
+        for (int i = 0; i < vertexCnt; i++) {
             dist[i] = Integer.MAX_VALUE;
         }
-        int[] predecessor = new int[v];
+        int[] predecessor = new int[vertexCnt];
         Queue<Integer> queue = new LinkedList<>();
         queue.add(vertex1);
         dist[vertex1] = 0;
