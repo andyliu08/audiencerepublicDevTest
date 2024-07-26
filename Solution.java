@@ -83,7 +83,8 @@ class GraphHashMap implements GraphInterface {
         int edgeNumberCreated = createMiniConnectedGraph(vertexList);
         // add more edges until the edge number meet the expectation
         addRestEdges(vertexList, this.edgeNumber - edgeNumberCreated);
-
+        
+        printGraph();
         return this;
     }
 
