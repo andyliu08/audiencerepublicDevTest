@@ -24,19 +24,23 @@ class RandomUtil {
 }
 
 
-interface GraphInterface {
-
+public interface GraphInterface {
     // get the number of vertex
     int getVertexNumber();
 
     // retrive all To-Vertexs with the weight from the start vertex
     // Return the array of string ["toVertex, weight"]
     List<String> getNextVertexArray(int start);
-
+ 
     // Generate a simple connected direct Graph with the assigned vertexNumber and edgeNumber
     GraphInterface createConnectedGraph();
+  
+    // Add the algorithm to compute the graph
+    GraphInterface setAlgorithm(AlgorithmInterface alg);
 
-    void printGraph();
+    GraphInterface computeDiameter();
+
+    GraphInterface computeShortestPath(int vertex1, int vertex2);
 }
 
 
@@ -56,6 +60,8 @@ class GraphHashMap implements GraphInterface {
     // the max weight can be set
     final int maxWeightSetting = 5;
 
+    private AlgorithmInterface alg = null;
+
     GraphHashMap(int vertexNumber, int edgeNumber) {
         this.vertexNumber = vertexNumber;
         this.edgeNumber = edgeNumber;
@@ -68,6 +74,7 @@ class GraphHashMap implements GraphInterface {
         }
     }
 
+    @Override
     // Generate a simple connected direct Graph with vertexNumber and edgeNumber
     public GraphHashMap createConnectedGraph() {
         List<Integer> vertexList = generateShuffleVertex();
@@ -77,6 +84,55 @@ class GraphHashMap implements GraphInterface {
         // add more edges until the edge number meet the expectation
         addRestEdges(vertexList, this.edgeNumber - edgeNumberCreated);
 
+        return this;
+    }
+
+    @Override
+    public int getVertexNumber() {
+        return this.vertexNumber;
+    }
+
+    @Override
+    public List<String> getNextVertexArray(int start) {
+        List<String> res = new ArrayList<>();
+        HashMap<Integer, Integer> next = graph.get(start);
+        // return the total max weight if no next vertex
+        if (next == null || next.isEmpty())
+            return res;
+
+        for (Map.Entry<Integer, Integer> entry : next.entrySet()) {
+            String nextVertex = entry.getKey().toString();
+            String weight = entry.getValue().toString();
+            res.add(nextVertex + "," + weight);
+        }
+        return res;
+    }
+
+    @Override
+    public GraphInterface setAlgorithm(AlgorithmInterface alg) {
+        this.alg = alg;
+        return this;
+    }
+
+    @Override
+    public GraphInterface computeDiameter() {
+        if(this.alg == null) {
+            System.out.println("Algorithm is missing, please call setAlgorithm to set it");
+            return this;
+        }
+
+        this.alg.computeDiameter(this);
+        return this;
+    }
+
+    @Override
+    public GraphInterface computeShortestPath(int vertex1, int vertex2) {
+        if(this.alg == null) {
+            System.out.println("Algorithm is missing, please call setAlgorithm to set it");
+            return this;
+        }
+
+        this.alg.getShortestPath(this, vertex1, vertex2);
         return this;
     }
 
@@ -148,7 +204,7 @@ class GraphHashMap implements GraphInterface {
         }
     }
 
-    public void printGraph() {
+    private void printGraph() {
         System.out.println("Print out the randomly generated graph: ");
         System.out.println("{ ");
         for (int i = 1; i <= this.vertexNumber; i++) {
@@ -171,34 +227,22 @@ class GraphHashMap implements GraphInterface {
         System.out.println("}");
         System.out.println("================================");
     }
-
-    @Override
-    public int getVertexNumber() {
-        return this.vertexNumber;
-    }
-
-    @Override
-    public List<String> getNextVertexArray(int start) {
-        List<String> res = new ArrayList<>();
-        HashMap<Integer, Integer> next = graph.get(start);
-        // return the total max weight if no next vertex
-        if (next == null || next.isEmpty())
-            return res;
-
-        for (Map.Entry<Integer, Integer> entry : next.entrySet()) {
-            String nextVertex = entry.getKey().toString();
-            String weight = entry.getValue().toString();
-            res.add(nextVertex + "," + weight);
-        }
-        return res;
-    }
 }
 
+interface AlgorithmInterface {
 
-class Algorithm {
+    AlgorithmInterface computeDiameter(GraphInterface graph);
+
+    void getShortestPath(GraphInterface graph, int vertex1, int vertex2);
+
+}
+
+public class Algorithm implements AlgorithmInterface{
+
     // record the max total weight for each vertex
     private int maxWeight = 0;
 
+    @Override
     public Algorithm computeDiameter(GraphInterface graph) {
         int radius = 0;
         int diameter = 0;
@@ -226,6 +270,7 @@ class Algorithm {
         return this;
     }
 
+    @Override
     public void getShortestPath(GraphInterface graph, int vertex1, int vertex2) {
         // Try to get the shortest path from vertex1 to vertex2 and from vertex2 to vertex1
         String[] resForward = dijkstra(graph, vertex1, vertex2).split(",");
@@ -354,10 +399,6 @@ public class Solution {
         int[] vertex = rndm.generateTwoRandomNums();
 
         GraphInterface graph = new GraphHashMap(vertexNum, edgeNum);
-        graph.createConnectedGraph().printGraph();
-
-        Algorithm alg = new Algorithm();
-        alg.computeDiameter(graph).getShortestPath(graph, vertex[0], vertex[1]);
-
+        graph.createConnectedGraph().setAlgorithm(new Algorithm()).computeDiameter().computeShortestPath(vertex[0], vertex[1]);
     }
 }
