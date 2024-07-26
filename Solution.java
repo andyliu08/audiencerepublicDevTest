@@ -2,8 +2,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-
-
 class RandomUtil {
 
     private Random rndm = new Random();
@@ -32,6 +30,7 @@ interface GraphInterface {
     int getVertexNumber();
 
     // retrive all To-Vertexs with the weight from the start vertex
+    // Return the array of string ["toVertex, weight"]
     List<String> getNextVertexArray(int start);
 
     // Generate a simple connected direct Graph with the assigned vertexNumber and edgeNumber
@@ -40,6 +39,7 @@ interface GraphInterface {
     void printGraph();
 }
 
+
 class GraphHashMap implements GraphInterface {
     // Key is the index of fromVertex and Value is a key value pair <toVertex, weight>
     private HashMap<Integer, HashMap<Integer, Integer>> graph;
@@ -47,9 +47,13 @@ class GraphHashMap implements GraphInterface {
     private int vertexNumber;
     private int edgeNumber;
 
+    // generate the random value for weight
     private RandomUtil rndmWeight;
+
+    // generate the random vertex index
     private RandomUtil rndmVertex;
 
+    // the max weight can be set
     final int maxWeightSetting = 5;
 
     GraphHashMap(int vertexNumber, int edgeNumber) {
@@ -222,6 +226,24 @@ class Algorithm {
         return this;
     }
 
+    public void getShortestPath(GraphInterface graph, int vertex1, int vertex2) {
+        // Try to get the shortest path from vertex1 to vertex2 and from vertex2 to vertex1
+        String[] resForward = dijkstra(graph, vertex1, vertex2).split(",");
+        String[] resBackward = dijkstra(graph, vertex2, vertex1).split(",");
+
+        int disForward = Integer.parseInt(resForward[0]);
+        int disBackward = Integer.parseInt(resBackward[0]);
+
+        System.out.println("The shortest distance path between vertex " + vertex1 + " and vertex " + vertex2 + " :");
+        if (disForward < disBackward) {
+            System.out.println(resForward[1]);
+            System.out.println("Total Weight: " + disForward);
+        } else {
+            System.out.println(resBackward[1]);
+            System.out.println("Total Weight: " + disBackward);
+        }
+    }
+
     private int computeEcceBacktrack(GraphInterface graph, int start, LinkedList<Integer> currentPath, int dist) {
         List<String> next = graph.getNextVertexArray(start);
         // return the total max weight if no next vertex
@@ -307,28 +329,7 @@ class Algorithm {
 
         return generateShortestPath(vertex1, vertex2, predecessor, dist[vertex2]);
     }
-
-    public void getShortestPath(GraphInterface graph, int vertex1, int vertex2) {
-        // Try to get the shortest path from vertex1 to vertex2 and from vertex2 to vertex1
-        String[] resForward = dijkstra(graph, vertex1, vertex2).split(",");
-        String[] resBackward = dijkstra(graph, vertex2, vertex1).split(",");
-
-        int disForward = Integer.parseInt(resForward[0]);
-        int disBackward = Integer.parseInt(resBackward[0]);
-
-        System.out.println("The shortest distance path between vertex " + vertex1 + " and vertex " + vertex2 + " :");
-        if (disForward < disBackward) {
-            System.out.println(resForward[1]);
-            System.out.println("Total Weight: " + disForward);
-        } else {
-            System.out.println(resBackward[1]);
-            System.out.println("Total Weight: " + disBackward);
-        }
-    }
 }
-
-
-
 
 public class Solution {
     public static void main(String argv) {
