@@ -405,10 +405,7 @@ public class Solution {
             return;
         }
 
-        RandomUtil rndm = new RandomUtil(vertexNum);
-        int[] vertex = rndm.generateTwoRandomNums();
-
-        GraphInterface graph = new GraphHashMap(vertexNum, edgeNum);
-        graph.createConnectedGraph().setAlgorithm(new Algorithm()).computeDiameter().computeShortestPath(vertex[0], vertex[1]);
+        int[] vertex = (new RandomUtil(vertexNum)).generateTwoRandomNums();
+        (new GraphHashMap(vertexNum, edgeNum)).createConnectedGraph().setAlgorithm(new Algorithm()).computeDiameter().computeShortestPath(vertex[0], vertex[1]);
     }
 }
