@@ -27,14 +27,17 @@ class RandomUtil {
 
 
 interface GraphInterface {
+
+    // get the number of vertex
     int getVertexNumber();
 
+    // retrive all To-Vertexs with the weight from the start vertex
     List<String> getNextVertexArray(int start);
 
-    GraphHashMap createConnectedGraph();
+    // Generate a simple connected direct Graph with the assigned vertexNumber and edgeNumber
+    GraphInterface createConnectedGraph();
 
     void printGraph();
-
 }
 
 class GraphHashMap implements GraphInterface {
@@ -347,13 +350,13 @@ public class Solution {
         }
 
         RandomUtil rndm = new RandomUtil(vertexNum);
-        int[] nodes = rndm.generateTwoRandomNums();
+        int[] vertex = rndm.generateTwoRandomNums();
 
         GraphInterface graph = new GraphHashMap(vertexNum, edgeNum);
         graph.createConnectedGraph().printGraph();
 
         Algorithm alg = new Algorithm();
-        alg.computeDiameter(graph).getShortestPath(graph, nodes[0], nodes[1]);
+        alg.computeDiameter(graph).getShortestPath(graph, vertex[0], vertex[1]);
 
     }
 }
